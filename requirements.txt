@@ -1,0 +1,12 @@
+flask
+pydantic
+python-dotenv
+langgraph
+langchain_core
+langchain_ollama
+langchain_google_genai
+beautifulsoup4
+lxml
+playwright
+flask_swagger_ui
+requests
