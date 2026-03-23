@@ -1,0 +1,188 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "description": "This agent allow us to analyze news sites to extract their configuration. And also generate reports from the findings.",
+    "version": "1.0.0",
+    "title": "News Site Analyzer Agent",
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "/"
+    }
+  ],
+  "tags": [
+    {
+      "name": "News Site Agent",
+      "description": "Main functionalities of the agent"
+    },
+    {
+      "name": "Health Status",
+      "description": "Check for server status"
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "tags": ["Health Status"],
+        "summary": "Check for server health status",
+        "responses": {
+          "200": {
+            "description": "OK: Healthy"
+          },
+          "500": { "description": "Failed. Server problem." }
+        }
+      },
+      "post": {
+        "tags": ["News Site Agent"],
+        "summary": "Run news site analysis using agent",
+        "requestBody": {
+          "description": "News Site Object",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/newsSiteAnalyzerBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK: newsSiteAnalyzerResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/newsSiteAnalyzerResponse"
+                }
+              }
+            }
+          },
+          "400": { "description": "Failed. Bad post data." },
+          "500": { "description": "Failed. Server problem." }
+        }
+      }
+    },
+
+    "/generate_report": {
+      "post": {
+        "tags": ["News Site Agent"],
+        "summary": "Generate report based on site config and observations",
+        "requestBody": {
+          "description": "Generate Report Object",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/generateReportBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK: File Output",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/generateReportResponse"
+                }
+              }
+            }
+          },
+          "400": { "description": "Failed. Bad post data." },
+          "500": { "description": "Failed. Server problem." }
+        }
+      }
+    }
+  },
+
+  "components": {
+    "schemas": {
+      "newsSiteAnalyzerBody": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "url": { "type": "string" }
+        }
+      },
+
+      "newsSiteAnalyzerResponse": {
+        "type": "object",
+        "properties": {
+          "config": {
+            "type": "object",
+            "properties": {
+              "author_selector": { "type": "string" },
+              "base_url": { "type": "string", "format": "uri" },
+              "content_selector": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "date_selector": { "type": "string" },
+              "img_url_selector": { "type": "string" },
+              "name": { "type": "string" },
+              "rate_limit": { "type": "number" },
+              "subtitle_selector": { "type": "string" },
+              "title_selector": { "type": "string" },
+              "url_dict": {
+                "type": "object",
+                "additionalProperties": { "type": "string" }
+              }
+            },
+            "required": [
+              "base_url",
+              "content_selector",
+              "name",
+              "rate_limit",
+              "title_selector",
+              "url_dict"
+            ]
+          },
+
+          "observations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": { "type": "string" },
+                "message": { "type": "string" },
+                "agent_type": { "type": "string" }
+              },
+              "required": ["type", "message", "agent_type"]
+            }
+          }
+        }
+      },
+
+      "generateReportBody": {
+        "type": "object",
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/newsSiteAnalyzerResponse/properties/config"
+          },
+          "observations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": { "type": "string" },
+                "message": { "type": "string" },
+                "agent_type": { "type": "string" }
+              },
+              "required": ["type", "message", "agent_type"]
+            }
+          }
+        }
+      },
+
+      "generateReportResponse": {
+        "type": "string",
+        "format": "binary"
+      }
+    }
+  }
+}
